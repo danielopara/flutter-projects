@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roll_dice/dice_roller.dart';
 
 class GraidentDecorator extends StatelessWidget {
   const GraidentDecorator({super.key, required this.start, required this.end});
@@ -16,9 +17,7 @@ class GraidentDecorator extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
       ),
-      child: Center(
-        child: const Text('Hello World', style: TextStyle(fontSize: 64)),
-      ),
+      child: Center(child: DiceRoller()),
     );
   }
 }
