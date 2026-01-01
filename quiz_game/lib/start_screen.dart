@@ -26,7 +26,7 @@ class StartScreen extends StatelessWidget {
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.white),
             ),
-            icon: Icon(Icons.arrow_right_alt),
+            icon: Icon(Icons.arrow_right_alt, color: Colors.white),
             label: const Text(
               'Start here!',
               style: TextStyle(color: Colors.white),
