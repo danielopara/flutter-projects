@@ -22,10 +22,16 @@ class _QuizState extends State<Quiz> {
 
   @override
   Widget build(BuildContext context) {
+    final List<String> selectedAnswers = [];
+
+    void addAnswers(String answer) {
+      selectedAnswers.add(answer);
+    }
+
     Widget screenWidget = StartScreen(changeScreen);
 
     if (activeScreen == 'questions-screen') {
-      screenWidget = const QuizScreen();
+      screenWidget = QuizScreen(onSelectedAnswer: addAnswers);
     }
 
     return Scaffold(
