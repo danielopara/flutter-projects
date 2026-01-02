@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:quiz_game/answer_screen.dart';
+import 'package:quiz_game/data/questions.dart';
 import 'package:quiz_game/quiz_screen.dart';
 import 'package:quiz_game/start_screen.dart';
 
@@ -22,16 +24,24 @@ class _QuizState extends State<Quiz> {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> selectedAnswers = [];
+    List<String> selectedAnswers = [];
 
     void addAnswers(String answer) {
       selectedAnswers.add(answer);
+      if (selectedAnswers.length == questions.length) {
+        setState(() {
+          // selectedAnswers = [];
+          activeScreen = 'answer-screen';
+        });
+      }
     }
 
     Widget screenWidget = StartScreen(changeScreen);
 
     if (activeScreen == 'questions-screen') {
       screenWidget = QuizScreen(onSelectedAnswer: addAnswers);
+    } else if (activeScreen == 'answer-screen') {
+      screenWidget = AnswerScreen();
     }
 
     return Scaffold(
