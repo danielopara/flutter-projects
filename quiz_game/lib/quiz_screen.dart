@@ -15,11 +15,23 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   var currentQuestionIndex = 0;
+  String? selectedAnswer;
+  List<String> shuffledAnswers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    shuffledAnswers = questions[currentQuestionIndex].getShuffledAnswers();
+  }
 
   void answerQuestion(String answer) {
     widget.onSelectedAnswer(answer);
     setState(() {
       currentQuestionIndex++;
+      selectedAnswer = null;
+      if (currentQuestionIndex < questions.length) {
+        shuffledAnswers = questions[currentQuestionIndex].getShuffledAnswers();
+      }
     });
   }
 
@@ -41,11 +53,18 @@ class _QuizScreenState extends State<QuizScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
-            ...currentQuestion.getShuffledAnswers().map((answer) {
+            ...shuffledAnswers.map((answer) {
               return AnswerButton(
                 answerText: answer,
+                isSelected: selectedAnswer == answer,
                 onTap: () {
-                  answerQuestion(answer);
+                  if (selectedAnswer == answer) {
+                    answerQuestion(answer);
+                  } else {
+                    setState(() {
+                      selectedAnswer = answer;
+                    });
+                  }
                 },
               );
             }),
