@@ -49,7 +49,7 @@ class _QuizScreenState extends State<QuizScreen> {
           children: [
             Text(
               currentQuestion.question,
-              style: const TextStyle(fontSize: 24),
+              style: const TextStyle(fontSize: 24, color: Colors.white),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),

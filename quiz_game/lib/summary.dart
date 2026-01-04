@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quiz_game/components/index.dart';
 
 class Summary extends StatelessWidget {
   const Summary({super.key, required this.summaryData});
@@ -24,19 +25,8 @@ class Summary extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 29,
-                      height: 28,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: getNumberColor(data),
-                      ),
-                      child: Text(
-                        ((data['question_index'] as int) + 1).toString(),
-                        style: TextStyle(),
-                      ),
-                    ),
+                    // indexing component
+                    Index(indexData: data),
                     const SizedBox(width: 20),
                     Expanded(
                       child: Column(
