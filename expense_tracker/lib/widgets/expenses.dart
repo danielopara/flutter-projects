@@ -32,9 +32,28 @@ class _ExpensesState extends State<Expenses> {
       date: DateTime.now(),
     ),
   ];
+
+  void showModal() {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        return Text('Hello');
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Expense Tracker'),
+        actions: [
+          IconButton(
+            onPressed: showModal,
+            icon: Icon(Icons.add_circle_outline_outlined),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           const Text('chart'),
