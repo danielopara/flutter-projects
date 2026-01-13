@@ -31,14 +31,39 @@ class _NewExpenseState extends State<NewExpense> {
             controller: _titleController,
             decoration: InputDecoration(label: const Text('Title')),
           ),
-          TextField(
-            maxLength: 10,
-            controller: _amountController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              prefix: const Text('₦ '),
-              label: const Text('Amount'),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  maxLength: 10,
+                  controller: _amountController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    prefix: const Text('₦ '),
+                    label: const Text('Amount'),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Text("Select Date"),
+                    IconButton(
+                      icon: Icon(Icons.calendar_month),
+                      onPressed: () {
+                        showDatePicker(
+                          context: context,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now(),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
 
           Row(
