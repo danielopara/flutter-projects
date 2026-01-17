@@ -40,6 +40,12 @@ class _ExpensesState extends State<Expenses> {
     });
   }
 
+  void _removeExpense(Expense expense) {
+    setState(() {
+      _expenseList.remove(expense);
+    });
+  }
+
   void showModal() {
     showModalBottomSheet(
       isScrollControlled: true,
@@ -52,6 +58,25 @@ class _ExpensesState extends State<Expenses> {
 
   @override
   Widget build(BuildContext context) {
+    Widget content = Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'No Expenses!',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+        ],
+      ),
+    );
+
+    if (_expenseList.isNotEmpty) {
+      content = ExpensesList(
+        expenses: _expenseList,
+        onRemoveExpense: _removeExpense,
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Expense Tracker'),
@@ -65,7 +90,7 @@ class _ExpensesState extends State<Expenses> {
       body: Column(
         children: [
           const Text('chart'),
-          Expanded(child: ExpensesList(expenses: _expenseList)),
+          Expanded(child: content),
         ],
       ),
     );
