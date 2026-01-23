@@ -26,6 +26,18 @@ class _GroceryListState extends State<GroceryList> {
     setState(() {
       _groceryItems.add(newItem);
     });
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('You added ${newItem.name} to the list!'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
