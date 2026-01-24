@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shopping_list/data/dummy_data.dart';
+import 'package:shopping_list/data/categories.dart';
+// import 'package:shopping_list/data/dummy_data.dart';
 import 'package:shopping_list/models/grocery_item.dart';
 import 'package:shopping_list/widgets/new_item.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class GroceryList extends StatefulWidget {
   const GroceryList({super.key});
@@ -40,11 +43,29 @@ class _GroceryListState extends State<GroceryList> {
     );
   }
 
-  void _removeItem(GroceryItem item) {
+  void _removeItem(GroceryItem item) async {
     final groceryItemIndex = _groceryItems.indexOf(item);
+    final url = Uri.https(
+      'fluttter-prep-a2292-default-rtdb.firebaseio.com',
+      'shopping-list/${item.id}.json',
+    );
+
     setState(() {
       _groceryItems.remove(item);
     });
+
+    final response = await http.delete(url);
+
+    if (response.statusCode >= 400) {
+      setState(() {
+        _groceryItems.insert(groceryItemIndex, item);
+      });
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
 
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -53,7 +74,22 @@ class _GroceryListState extends State<GroceryList> {
         duration: Duration(seconds: 5),
         action: SnackBarAction(
           label: 'Undo',
-          onPressed: () {
+          onPressed: () async {
+            final undoUrl = Uri.https(
+              'fluttter-prep-a2292-default-rtdb.firebaseio.com',
+              'shopping-list/${item.id}.json',
+            );
+
+            await http.put(
+              undoUrl,
+              headers: {'Content-Type': 'application/json'},
+              body: json.encode({
+                'name': item.name,
+                'quantity': item.quantity,
+                'category': item.category.title,
+              }),
+            );
+
             setState(() {
               _groceryItems.insert(groceryItemIndex, item);
             });
@@ -61,6 +97,52 @@ class _GroceryListState extends State<GroceryList> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadItems();
+  }
+
+  void _loadItems() async {
+    final url = Uri.https(
+      'fluttter-prep-a2292-default-rtdb.firebaseio.com',
+      'shopping-list.json',
+    );
+
+    try {
+      final response = await http.get(url);
+
+      if (response.body == 'null') {
+        return;
+      }
+
+      final Map<String, dynamic> listData = json.decode(response.body);
+      final List<GroceryItem> loadItems = [];
+
+      for (final entry in listData.entries) {
+        final itemData = entry.value;
+        final category = categories.entries
+            .firstWhere((entry) => entry.value.title == itemData['category'])
+            .value;
+        loadItems.add(
+          GroceryItem(
+            id: entry.key,
+            name: itemData['name'],
+            quantity: itemData['quantity'],
+            category: category,
+          ),
+        );
+      }
+
+      setState(() {
+        _groceryItems.clear();
+        _groceryItems.addAll(loadItems);
+      });
+    } catch (error) {
+      // return 'error';
+    }
   }
 
   @override
