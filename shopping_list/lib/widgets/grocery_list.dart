@@ -17,6 +17,7 @@ class GroceryList extends StatefulWidget {
 
 class _GroceryListState extends State<GroceryList> {
   final List<GroceryItem> _groceryItems = [];
+  var _isLoading = true;
 
   void _addItem() async {
     final newItem = await Navigator.of(
@@ -45,6 +46,8 @@ class _GroceryListState extends State<GroceryList> {
 
   void _removeItem(GroceryItem item) async {
     final groceryItemIndex = _groceryItems.indexOf(item);
+    final messenger = ScaffoldMessenger.of(context);
+
     final url = Uri.https(
       'fluttter-prep-a2292-default-rtdb.firebaseio.com',
       'shopping-list/${item.id}.json',
@@ -54,24 +57,12 @@ class _GroceryListState extends State<GroceryList> {
       _groceryItems.remove(item);
     });
 
-    final response = await http.delete(url);
+    messenger.clearSnackBars();
 
-    if (response.statusCode >= 400) {
-      setState(() {
-        _groceryItems.insert(groceryItemIndex, item);
-      });
-      return;
-    }
-
-    if (!mounted) {
-      return;
-    }
-
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.showSnackBar(
       SnackBar(
-        content: const Text('Item delete'),
-        duration: Duration(seconds: 5),
+        content: const Text('Item deleted'),
+        duration: const Duration(seconds: 2),
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () async {
@@ -90,6 +81,8 @@ class _GroceryListState extends State<GroceryList> {
               }),
             );
 
+            if (!mounted) return;
+
             setState(() {
               _groceryItems.insert(groceryItemIndex, item);
             });
@@ -97,6 +90,16 @@ class _GroceryListState extends State<GroceryList> {
         ),
       ),
     );
+
+    final response = await http.delete(url);
+
+    if (response.statusCode >= 400) {
+      setState(() {
+        _groceryItems.insert(groceryItemIndex, item);
+      });
+      messenger.hideCurrentSnackBar();
+      return;
+    }
   }
 
   @override
@@ -139,6 +142,7 @@ class _GroceryListState extends State<GroceryList> {
       setState(() {
         _groceryItems.clear();
         _groceryItems.addAll(loadItems);
+        _isLoading = false;
       });
     } catch (error) {
       // return 'error';
@@ -169,6 +173,10 @@ class _GroceryListState extends State<GroceryList> {
               ),
             ),
           );
+
+    if (_isLoading) {
+      content = const Center(child: CircularProgressIndicator());
+    }
 
     return Scaffold(
       appBar: AppBar(
