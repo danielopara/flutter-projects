@@ -18,6 +18,7 @@ class GroceryList extends StatefulWidget {
 class _GroceryListState extends State<GroceryList> {
   final List<GroceryItem> _groceryItems = [];
   var _isLoading = true;
+  String? _error;
 
   void _addItem() async {
     final newItem = await Navigator.of(
@@ -94,6 +95,10 @@ class _GroceryListState extends State<GroceryList> {
     final response = await http.delete(url);
 
     if (response.statusCode >= 400) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: const Text('Failed to delete item')));
       setState(() {
         _groceryItems.insert(groceryItemIndex, item);
       });
@@ -118,9 +123,17 @@ class _GroceryListState extends State<GroceryList> {
       final response = await http.get(url);
 
       if (response.body == 'null') {
+        setState(() {
+          _isLoading = false;
+        });
         return;
       }
 
+      if (response.statusCode >= 400) {
+        setState(() {
+          _error = 'Failed to load items. try again later.';
+        });
+      }
       final Map<String, dynamic> listData = json.decode(response.body);
       final List<GroceryItem> loadItems = [];
 
@@ -145,7 +158,10 @@ class _GroceryListState extends State<GroceryList> {
         _isLoading = false;
       });
     } catch (error) {
-      // return 'error';
+      setState(() {
+        _error = 'Failed to load items. try again later.';
+        _isLoading = false;
+      });
     }
   }
 
@@ -176,6 +192,10 @@ class _GroceryListState extends State<GroceryList> {
 
     if (_isLoading) {
       content = const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error != null) {
+      content = Center(child: Text(_error!));
     }
 
     return Scaffold(
