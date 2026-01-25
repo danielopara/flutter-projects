@@ -39,8 +39,8 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: isDarkMode ? darkTheme : lightTheme,
-      home: Calculator(),
+      theme: _isToggle ? darkTheme : lightTheme,
+      home: Calculator(isDarkMode: _isToggle, onThemeToggle: _switchTheme),
     );
   }
 }
