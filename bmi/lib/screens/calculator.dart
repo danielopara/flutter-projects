@@ -18,45 +18,12 @@ class Calculator extends StatefulWidget {
 
 class _CalculatorState extends State<Calculator> {
   Genders? selectedGender;
+  final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("BMI Calculator")),
-      drawer: Drawer(
-        child: Column(
-          children: [
-            DrawerHeader(
-              // decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-              child: ListTile(
-                title: const Text(
-                  'BMI History',
-                  style: TextStyle(fontSize: 24),
-                ),
-                trailing: IconButton(
-                  icon: Icon(Icons.cancel),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ),
-            ),
-
-            Divider(),
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: ListTile(
-                title: const Text('Dark Mode'),
-                trailing: Switch(
-                  value: widget.isDarkMode,
-                  onChanged: (value) {
-                    widget.onThemeToggle();
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      drawer: AppDrawer(widget: widget),
       body: Column(
         children: [
           Row(
@@ -114,6 +81,138 @@ class _CalculatorState extends State<Calculator> {
                 ),
               ),
             ],
+          ),
+
+          const SizedBox(height: 20),
+          Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Name (Nickname)',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: TextFormField(
+                          decoration: const InputDecoration(
+                            labelText: 'Weight (kg)',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: TextFormField(
+                          decoration: const InputDecoration(
+                            labelText: 'Height (cm)',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                      labelText: 'Age',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {},
+                        child: const Text('Submit'),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () {},
+                        child: const Text('Reset'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AppDrawer extends StatelessWidget {
+  const AppDrawer({super.key, required this.widget});
+
+  final Calculator widget;
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: Column(
+        children: [
+          DrawerHeader(
+            // decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+            child: ListTile(
+              title: const Text('BMI History', style: TextStyle(fontSize: 24)),
+              trailing: IconButton(
+                icon: Icon(Icons.cancel),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ),
+
+          Divider(),
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: ListTile(
+              title: const Text('Dark Mode'),
+              trailing: Switch(
+                value: widget.isDarkMode,
+                onChanged: (value) {
+                  widget.onThemeToggle();
+                },
+              ),
+            ),
           ),
         ],
       ),
