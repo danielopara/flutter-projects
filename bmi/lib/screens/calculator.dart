@@ -19,6 +19,21 @@ class Calculator extends StatefulWidget {
 class _CalculatorState extends State<Calculator> {
   Genders? selectedGender;
   final _formKey = GlobalKey<FormState>();
+
+  void _submitForm() {
+    _formKey.currentState!.validate();
+
+    if (selectedGender == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please select a Gender'),
+          duration: Duration(seconds: 5),
+        ),
+      );
+      return;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,6 +113,13 @@ class _CalculatorState extends State<Calculator> {
                       labelText: 'Name (Nickname)',
                       border: OutlineInputBorder(),
                     ),
+                    maxLength: 30,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Enter a valid name';
+                      }
+                      return null;
+                    },
                   ),
                 ),
                 Row(
@@ -114,6 +136,15 @@ class _CalculatorState extends State<Calculator> {
                             border: OutlineInputBorder(),
                           ),
                           keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null ||
+                                value.isEmpty ||
+                                int.tryParse(value)! <= 0 ||
+                                int.tryParse(value) == null) {
+                              return 'Enter a validated weight';
+                            }
+                            return null;
+                          },
                         ),
                       ),
                     ),
@@ -129,6 +160,15 @@ class _CalculatorState extends State<Calculator> {
                             border: OutlineInputBorder(),
                           ),
                           keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null ||
+                                value.isEmpty ||
+                                int.tryParse(value)! <= 0 ||
+                                int.tryParse(value) == null) {
+                              return 'Enter a validated height';
+                            }
+                            return null;
+                          },
                         ),
                       ),
                     ),
@@ -144,6 +184,15 @@ class _CalculatorState extends State<Calculator> {
                       labelText: 'Age',
                       border: OutlineInputBorder(),
                     ),
+                    validator: (value) {
+                      if (value == null ||
+                          value.isEmpty ||
+                          int.tryParse(value)! <= 0 ||
+                          int.tryParse(value) == null) {
+                        return 'Enter a validated height';
+                      }
+                      return null;
+                    },
                   ),
                 ),
                 Padding(
@@ -154,7 +203,7 @@ class _CalculatorState extends State<Calculator> {
                   child: Row(
                     children: [
                       ElevatedButton(
-                        onPressed: () {},
+                        onPressed: _submitForm,
                         child: const Text('Submit'),
                       ),
                       const SizedBox(width: 10),
@@ -163,7 +212,9 @@ class _CalculatorState extends State<Calculator> {
                           backgroundColor: Colors.red,
                           foregroundColor: Colors.white,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          _formKey.currentState!.reset();
+                        },
                         child: const Text('Reset'),
                       ),
                     ],
@@ -177,6 +228,8 @@ class _CalculatorState extends State<Calculator> {
     );
   }
 }
+
+// Drawer
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key, required this.widget});
