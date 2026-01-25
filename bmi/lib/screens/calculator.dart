@@ -19,9 +19,65 @@ class Calculator extends StatefulWidget {
 class _CalculatorState extends State<Calculator> {
   Genders? selectedGender;
   final _formKey = GlobalKey<FormState>();
+  String _name = '';
+  double _weight = 0.0;
+  double _height = 0.0;
+  int _age = 0;
+  final _bmi = 0.0;
+
+  String _getAgeAdjustedRating(double bmi, int age) {
+    if (age < 18) return "Consult Pediatric Chart"; // BMI for kids is different
+
+    if (age >= 19 && age <= 24) {
+      return (bmi >= 19 && bmi <= 24) ? "Normal" : _getStandardRating(bmi);
+    }
+    if (age >= 25 && age <= 34) {
+      return (bmi >= 20 && bmi <= 25) ? "Normal" : _getStandardRating(bmi);
+    }
+    if (age >= 35 && age <= 44) {
+      return (bmi >= 21 && bmi <= 26) ? "Normal" : _getStandardRating(bmi);
+    }
+    if (age >= 45 && age <= 54) {
+      return (bmi >= 22 && bmi <= 27) ? "Normal" : _getStandardRating(bmi);
+    }
+    if (age >= 55 && age <= 64) {
+      return (bmi >= 23 && bmi <= 28) ? "Normal" : _getStandardRating(bmi);
+    }
+    if (age >= 65) {
+      return (bmi >= 24 && bmi <= 29) ? "Normal" : _getStandardRating(bmi);
+    }
+    return _getStandardRating(bmi);
+  }
+
+  String _getStandardRating(double bmi) {
+    if (bmi < 18.5) return "Underweight";
+    if (bmi < 25.0) return "Normal";
+    if (bmi < 30.0) return "Overweight";
+    return "Obese";
+  }
+
+  void _showResultDialog(double bmi, String rating) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text("Hello: $_name!"),
+        content: Text(
+          "Your BMI is ${bmi.toStringAsFixed(1)}\n"
+          "Status: $rating",
+          style: const TextStyle(fontSize: 20),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Close"),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _submitForm() {
-    _formKey.currentState!.validate();
+    bool isFormValid = _formKey.currentState!.validate();
 
     if (selectedGender == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -31,6 +87,17 @@ class _CalculatorState extends State<Calculator> {
         ),
       );
       return;
+    }
+
+    if (isFormValid) {
+      _formKey.currentState!.save();
+      double heightInMeters = _height / 100;
+      double bmiResult = _weight / (heightInMeters * heightInMeters);
+      print("Age: $_age");
+
+      String rating = _getAgeAdjustedRating(bmiResult, _age);
+
+      _showResultDialog(bmiResult, rating);
     }
   }
 
@@ -120,6 +187,9 @@ class _CalculatorState extends State<Calculator> {
                       }
                       return null;
                     },
+                    onSaved: (value) {
+                      _name = value!;
+                    },
                   ),
                 ),
                 Row(
@@ -139,11 +209,14 @@ class _CalculatorState extends State<Calculator> {
                           validator: (value) {
                             if (value == null ||
                                 value.isEmpty ||
-                                int.tryParse(value)! <= 0 ||
-                                int.tryParse(value) == null) {
+                                double.tryParse(value)! <= 0 ||
+                                double.tryParse(value) == null) {
                               return 'Enter a validated weight';
                             }
                             return null;
+                          },
+                          onSaved: (value) {
+                            _weight = double.parse(value!);
                           },
                         ),
                       ),
@@ -163,11 +236,14 @@ class _CalculatorState extends State<Calculator> {
                           validator: (value) {
                             if (value == null ||
                                 value.isEmpty ||
-                                int.tryParse(value)! <= 0 ||
-                                int.tryParse(value) == null) {
+                                double.tryParse(value)! <= 0 ||
+                                double.tryParse(value) == null) {
                               return 'Enter a validated height';
                             }
                             return null;
+                          },
+                          onSaved: (value) {
+                            _height = double.parse(value!);
                           },
                         ),
                       ),
@@ -192,6 +268,9 @@ class _CalculatorState extends State<Calculator> {
                         return 'Enter a validated height';
                       }
                       return null;
+                    },
+                    onSaved: (value) {
+                      _age = int.parse(value!);
                     },
                   ),
                 ),
