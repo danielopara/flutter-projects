@@ -1,4 +1,5 @@
 import 'package:bmi/data/enums/gender.dart';
+import 'package:bmi/models/bmi_model.dart';
 import 'package:flutter/material.dart';
 
 class Calculator extends StatefulWidget {
@@ -24,6 +25,19 @@ class _CalculatorState extends State<Calculator> {
   double _height = 0.0;
   int _age = 0;
   final _bmi = 0.0;
+
+  List<BmiModel> bmiList = [
+    BmiModel(
+      id: DateTime.now().toString(),
+      name: 'John',
+      weight: 23.4,
+      height: 172.2,
+      gender: Genders.male,
+      age: 20,
+      bmi: 24,
+      status: 'Normal',
+    ),
+  ];
 
   String _getAgeAdjustedRating(double bmi, int age) {
     if (age < 18) return "Consult Pediatric Chart"; // BMI for kids is different
@@ -76,6 +90,23 @@ class _CalculatorState extends State<Calculator> {
     );
   }
 
+  void _addBMI(String status, double bmiResult) {
+    setState(() {
+      bmiList.add(
+        BmiModel(
+          id: DateTime.now().toString(),
+          name: _name,
+          age: _age,
+          weight: _weight,
+          height: _height,
+          status: status,
+          gender: selectedGender!,
+          bmi: bmiResult,
+        ),
+      );
+    });
+  }
+
   void _submitForm() {
     bool isFormValid = _formKey.currentState!.validate();
 
@@ -97,6 +128,10 @@ class _CalculatorState extends State<Calculator> {
 
       String rating = _getAgeAdjustedRating(bmiResult, _age);
 
+      _addBMI(rating, bmiResult);
+
+      print(bmiList);
+
       _showResultDialog(bmiResult, rating);
     }
   }
@@ -105,7 +140,7 @@ class _CalculatorState extends State<Calculator> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("BMI Calculator")),
-      drawer: AppDrawer(widget: widget),
+      drawer: AppDrawer(widget: widget, bmiHistory: bmiList),
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context).unfocus();
@@ -319,9 +354,10 @@ class _CalculatorState extends State<Calculator> {
 // Drawer
 
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key, required this.widget});
+  const AppDrawer({super.key, required this.widget, required this.bmiHistory});
 
   final Calculator widget;
+  final List<BmiModel> bmiHistory;
 
   @override
   Widget build(BuildContext context) {
@@ -329,30 +365,56 @@ class AppDrawer extends StatelessWidget {
       child: Column(
         children: [
           DrawerHeader(
-            // decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-            child: ListTile(
-              title: const Text('BMI History', style: TextStyle(fontSize: 24)),
-              trailing: IconButton(
-                icon: Icon(Icons.cancel),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+            child: Center(
+              child: ListTile(
+                title: const Text(
+                  'BMI History',
+                  style: TextStyle(fontSize: 24),
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.cancel),
+                  onPressed: () => Navigator.pop(context),
+                ),
               ),
             ),
           ),
 
-          Divider(),
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: ListTile(
-              title: const Text('Dark Mode'),
-              trailing: Switch(
-                value: widget.isDarkMode,
-                onChanged: (value) {
-                  widget.onThemeToggle();
-                },
-              ),
-            ),
+          SwitchListTile(
+            title: const Text('Dark Mode'),
+            value: widget.isDarkMode,
+            onChanged: (value) => widget.onThemeToggle(),
+          ),
+
+          const Divider(),
+          Expanded(
+            child: bmiHistory.isEmpty
+                ? const Center(child: Text('No history yet!'))
+                : ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: bmiHistory.length,
+                    itemBuilder: (ctx, index) {
+                      final item = bmiHistory[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: item.status == 'Normal'
+                              ? Colors.green
+                              : Colors.orange,
+                          child: Text(
+                            item.bmi.toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        title: Text("${item.name}'s ${item.status}"),
+                        subtitle: Text(
+                          'Weight: ${item.weight}kg | Age: ${item.age}',
+                        ),
+                        isThreeLine: true,
+                      );
+                    },
+                  ),
           ),
         ],
       ),
