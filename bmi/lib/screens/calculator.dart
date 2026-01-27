@@ -106,203 +106,211 @@ class _CalculatorState extends State<Calculator> {
     return Scaffold(
       appBar: AppBar(title: Text("BMI Calculator")),
       drawer: AppDrawer(widget: widget),
-      body: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: SingleChildScrollView(
+          child: Column(
             children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedGender = Genders.male;
-                    });
-                  },
-                  child: Container(
-                    alignment: Alignment.center,
-                    margin: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: selectedGender == Genders.male
-                          ? Colors.blue
-                          : Colors.grey,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    width: 150,
-                    height: 100,
-                    child: const Text(
-                      'Male',
-                      style: TextStyle(color: Colors.white, fontSize: 25),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedGender = Genders.female;
-                    });
-                  },
-                  child: Container(
-                    margin: EdgeInsets.all(15),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: selectedGender == Genders.female
-                          ? const Color.fromARGB(255, 216, 8, 78)
-                          : Colors.grey,
-                    ),
-                    width: 150,
-                    height: 100,
-                    child: const Text(
-                      'Female',
-                      style: TextStyle(color: Colors.white, fontSize: 25),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 20),
-          Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: 'Name (Nickname)',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLength: 30,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Enter a valid name';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) {
-                      _name = value!;
-                    },
-                  ),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedGender = Genders.male;
+                        });
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        margin: const EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                          color: selectedGender == Genders.male
+                              ? Colors.blue
+                              : Colors.grey,
+                          borderRadius: BorderRadius.circular(15),
                         ),
-                        child: TextFormField(
-                          decoration: const InputDecoration(
-                            labelText: 'Weight (kg)',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null ||
-                                value.isEmpty ||
-                                double.tryParse(value)! <= 0 ||
-                                double.tryParse(value) == null) {
-                              return 'Enter a validated weight';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _weight = double.parse(value!);
-                          },
+                        width: 150,
+                        height: 100,
+                        child: const Text(
+                          'Male',
+                          style: TextStyle(color: Colors.white, fontSize: 25),
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedGender = Genders.female;
+                        });
+                      },
+                      child: Container(
+                        margin: EdgeInsets.all(15),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: selectedGender == Genders.female
+                              ? const Color.fromARGB(255, 216, 8, 78)
+                              : Colors.grey,
                         ),
-                        child: TextFormField(
-                          decoration: const InputDecoration(
-                            labelText: 'Height (cm)',
-                            border: OutlineInputBorder(),
+                        width: 150,
+                        height: 100,
+                        child: const Text(
+                          'Female',
+                          style: TextStyle(color: Colors.white, fontSize: 25),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Name (Nickname)',
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLength: 30,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Enter a valid name';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          _name = value!;
+                        },
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: TextFormField(
+                              decoration: const InputDecoration(
+                                labelText: 'Weight (kg)',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null ||
+                                    value.isEmpty ||
+                                    double.tryParse(value)! <= 0 ||
+                                    double.tryParse(value) == null) {
+                                  return 'Enter a validated weight';
+                                }
+                                return null;
+                              },
+                              onSaved: (value) {
+                                _weight = double.parse(value!);
+                              },
+                            ),
                           ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null ||
-                                value.isEmpty ||
-                                double.tryParse(value)! <= 0 ||
-                                double.tryParse(value) == null) {
-                              return 'Enter a validated height';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _height = double.parse(value!);
-                          },
                         ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: TextFormField(
+                              decoration: const InputDecoration(
+                                labelText: 'Height (cm)',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null ||
+                                    value.isEmpty ||
+                                    double.tryParse(value)! <= 0 ||
+                                    double.tryParse(value) == null) {
+                                  return 'Enter a validated height';
+                                }
+                                return null;
+                              },
+                              onSaved: (value) {
+                                _height = double.parse(value!);
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Age',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null ||
+                              value.isEmpty ||
+                              int.tryParse(value)! <= 0 ||
+                              int.tryParse(value) == null) {
+                            return 'Enter a validated age';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          _age = int.parse(value!);
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: _submitForm,
+                            child: const Text('Submit'),
+                          ),
+                          const SizedBox(width: 10),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () {
+                              _formKey.currentState!.reset();
+                            },
+                            child: const Text('Reset'),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Age',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null ||
-                          value.isEmpty ||
-                          int.tryParse(value)! <= 0 ||
-                          int.tryParse(value) == null) {
-                        return 'Enter a validated height';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) {
-                      _age = int.parse(value!);
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    children: [
-                      ElevatedButton(
-                        onPressed: _submitForm,
-                        child: const Text('Submit'),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                        ),
-                        onPressed: () {
-                          _formKey.currentState!.reset();
-                        },
-                        child: const Text('Reset'),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
