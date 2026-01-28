@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:bmi/data/enums/gender.dart';
 import 'package:bmi/models/bmi_model.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class Calculator extends StatefulWidget {
   const Calculator({
@@ -24,7 +27,8 @@ class _CalculatorState extends State<Calculator> {
   double _weight = 0.0;
   double _height = 0.0;
   int _age = 0;
-  final _bmi = 0.0;
+  // final _bmi = 0.0;
+  var _isSubmitting = false;
 
   List<BmiModel> bmiList = [
     BmiModel(
@@ -107,8 +111,12 @@ class _CalculatorState extends State<Calculator> {
     });
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     bool isFormValid = _formKey.currentState!.validate();
+    final url = Uri.https(
+      'fluttter-prep-a2292-default-rtdb.firebaseio.com',
+      'bmi.json',
+    );
 
     if (selectedGender == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -121,18 +129,46 @@ class _CalculatorState extends State<Calculator> {
     }
 
     if (isFormValid) {
+      setState(() {
+        _isSubmitting = true;
+      });
       _formKey.currentState!.save();
-      double heightInMeters = _height / 100;
-      double bmiResult = _weight / (heightInMeters * heightInMeters);
-      print("Age: $_age");
 
-      String rating = _getAgeAdjustedRating(bmiResult, _age);
+      try {
+        double heightInMeters = _height / 100;
+        double bmiResult = _weight / (heightInMeters * heightInMeters);
 
-      _addBMI(rating, bmiResult);
+        String rating = _getAgeAdjustedRating(bmiResult, _age);
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({
+            'bmi_name': _name,
+            'bmi_value': bmiResult,
+            'status': rating,
+            'age': _age,
+            'height': _height,
+            'weight': _weight,
+            'gender': selectedGender!.name,
+          }),
+        );
 
-      print(bmiList);
+        if (response.statusCode == 200) {
+          _addBMI(rating, bmiResult);
 
-      _showResultDialog(bmiResult, rating);
+          _showResultDialog(bmiResult, rating);
+        }
+      } catch (error) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: const Text('Failed to save online.')));
+      } finally {
+        _formKey.currentState!.reset();
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
@@ -323,8 +359,14 @@ class _CalculatorState extends State<Calculator> {
                       child: Row(
                         children: [
                           ElevatedButton(
-                            onPressed: _submitForm,
-                            child: const Text('Submit'),
+                            onPressed: _isSubmitting ? null : _submitForm,
+                            child: _isSubmitting
+                                ? SizedBox(
+                                    height: 16,
+                                    width: 16,
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : const Text('Submit'),
                           ),
                           const SizedBox(width: 10),
                           ElevatedButton(
@@ -332,9 +374,11 @@ class _CalculatorState extends State<Calculator> {
                               backgroundColor: Colors.red,
                               foregroundColor: Colors.white,
                             ),
-                            onPressed: () {
-                              _formKey.currentState!.reset();
-                            },
+                            onPressed: _isSubmitting
+                                ? null
+                                : () {
+                                    _formKey.currentState!.reset();
+                                  },
                             child: const Text('Reset'),
                           ),
                         ],
@@ -388,7 +432,9 @@ class AppDrawer extends StatelessWidget {
           const Divider(),
           Expanded(
             child: bmiHistory.isEmpty
-                ? const Center(child: Text('No history yet!'))
+                ? SingleChildScrollView(
+                    child: const Center(child: Text('No history yet!')),
+                  )
                 : ListView.builder(
                     padding: EdgeInsets.zero,
                     itemCount: bmiHistory.length,
