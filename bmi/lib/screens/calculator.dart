@@ -172,6 +172,60 @@ class _CalculatorState extends State<Calculator> {
     }
   }
 
+  void _loadBMIList() async {
+    final url = Uri.https(
+      'fluttter-prep-a2292-default-rtdb.firebaseio.com',
+      'bmi.json',
+    );
+
+    try {
+      final response = await http.get(url);
+      if (response.body == 'null') {
+        print('null');
+      }
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<BmiModel> loadedBmi = [];
+
+        for (final entry in data.entries) {
+          final String dbGender = (entry.value['gender'] ?? 'male')
+              .toString()
+              .toLowerCase();
+
+          // 2. Use a safe search to find the enum match
+          final Genders matchedGender = Genders.values.firstWhere(
+            (g) => g.name.toLowerCase() == dbGender,
+            orElse: () => Genders.male, // Fallback if no match is found
+          );
+          loadedBmi.add(
+            BmiModel(
+              id: entry.key,
+              name: entry.value['bmi_name'],
+              weight: entry.value['weight'],
+              height: entry.value['height'],
+              status: entry.value['status'],
+              age: entry.value['age'],
+              bmi: entry.value['bmi_value'],
+              gender: matchedGender,
+            ),
+          );
+        }
+        setState(() {
+          bmiList.clear();
+          bmiList = loadedBmi;
+        });
+      }
+    } catch (error) {
+      return print("Error loading: $error");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBMIList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
