@@ -4,6 +4,7 @@ class Weather {
   final String condition;
   final int humidity;
   final double windSpeed;
+  final int weatherCode;
 
   Weather({
     required this.cityName,
@@ -11,15 +12,21 @@ class Weather {
     required this.condition,
     required this.humidity,
     required this.windSpeed,
+    required this.weatherCode,
   });
 
   factory Weather.fromJson(Map<String, dynamic> json, String name) {
+    if (json['current'] == null) {
+      throw Exception("Weather data for $name is missing the 'current' node");
+    }
+
     return Weather(
       cityName: name,
       temperature: json['current']['temperature_2m'].toDouble(),
       condition: _mapConditionCode(json['current']['weather_code']),
       humidity: json['current']['relative_humidity_2m'],
       windSpeed: json['current']['wind_speed_10m'].toDouble(),
+      weatherCode: json['current']['weather_code'],
     );
   }
 
