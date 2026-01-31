@@ -181,7 +181,7 @@ class _CalculatorState extends State<Calculator> {
     try {
       final response = await http.get(url);
       if (response.body == 'null') {
-        print('null');
+        return;
       }
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
@@ -216,7 +216,10 @@ class _CalculatorState extends State<Calculator> {
         });
       }
     } catch (error) {
-      return print("Error loading: $error");
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: const Text('Unable to load BMI history')),
+      );
     }
   }
 
@@ -477,7 +480,7 @@ class AppDrawer extends StatelessWidget {
             ),
           ),
 
-          SwitchListTile(
+          SwitchListTile.adaptive(
             title: const Text('Dark Mode'),
             value: widget.isDarkMode,
             onChanged: (value) => widget.onThemeToggle(),
