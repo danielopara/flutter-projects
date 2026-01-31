@@ -11,7 +11,7 @@ class WeatherScreen extends StatefulWidget {
 }
 
 class _WeatherScreenState extends State<WeatherScreen> {
-  late Future<Weather> _weatherFuture;
+  late Future<List<Weather>> _weatherFuture;
   String _currentTime = "";
   Timer? _timer;
 
@@ -38,12 +38,12 @@ class _WeatherScreenState extends State<WeatherScreen> {
       const Duration(seconds: 1),
       (timer) => _updateTime(),
     );
-    _weatherFuture = WeatherServices().getWeather("Lagos", 6.45, 3.39);
+    _weatherFuture = WeatherServices().getNigerianStates();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return FutureBuilder<List<Weather>>(
       future: _weatherFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -51,33 +51,77 @@ class _WeatherScreenState extends State<WeatherScreen> {
         } else if (snapshot.hasError) {
           return Text("Check Internet Connection");
         } else {
+          final weatherData = snapshot.data!;
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  _currentTime,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.white70,
-                    letterSpacing: 2,
+                ListTile(
+                  leading: const Text(
+                    'Nigeria Time:',
+                    style: TextStyle(fontSize: 24, color: Colors.white70),
+                  ),
+                  trailing: Text(
+                    _currentTime,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      color: Colors.white70,
+                      letterSpacing: 2,
+                    ),
                   ),
                 ),
-                Text(
-                  snapshot.data!.cityName.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: GridView.builder(
+                      padding: const EdgeInsets.only(top: 10),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 1.5,
+                        mainAxisSpacing: 20,
+                        crossAxisSpacing: 30,
+                      ),
+                      itemCount: weatherData.length,
+                      itemBuilder: (context, index) {
+                        final cityWeather = weatherData[index];
+                        return Container(
+                          padding: EdgeInsets.only(left: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                cityWeather.cityName,
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                "${cityWeather.temperature}°C",
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Text(
+                                "Sunny",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-                Text(
-                  "${snapshot.data!.temperature}°C",
-                  style: TextStyle(fontSize: 80, color: Colors.white),
-                ),
-                Text(
-                  "Sunny",
-                  style: TextStyle(fontSize: 20, color: Colors.white70),
                 ),
               ],
             ),
