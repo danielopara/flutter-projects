@@ -54,7 +54,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
         } else if (snapshot.hasError) {
           return Text("Check Internet Connection");
         } else {
-          print(snapshot.data);
           final nigeriaWeatherData = snapshot.data![0];
           final abroadWeatherData = snapshot.data![1];
 
