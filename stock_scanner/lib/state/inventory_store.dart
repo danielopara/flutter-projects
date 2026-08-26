@@ -15,6 +15,7 @@ class InventoryStore extends ChangeNotifier {
   List<Item> get items => List.unmodifiable(_items);
   String get search => _search;
   bool get loading => _isLoading;
+  int get lowStockCount => _items.where((i) => i.isLowStock).length;
 
   Future<void> init() async {
     _isLoading = true;
