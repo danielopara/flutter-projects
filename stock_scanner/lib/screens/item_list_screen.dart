@@ -88,8 +88,11 @@ class _ItemListScreenState extends State<ItemListScreen> {
     final theme = Theme.of(context);
     final items = store.items;
 
+    final totalUnits = items.fold<double>(0, (sum, i) => sum + i.quantity);
+
     return Scaffold(
       appBar: AppBar(
+        titleSpacing: 20,
         title: _searching
             ? TextField(
                 controller: _searchController,
@@ -98,9 +101,25 @@ class _ItemListScreenState extends State<ItemListScreen> {
                 decoration: const InputDecoration(
                   hintText: 'Search name, SKU or barcode',
                   border: InputBorder.none,
+                  filled: false,
+                  isDense: true,
                 ),
               )
-            : const Text('Stock'),
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Stock'),
+                  if (items.isNotEmpty)
+                    Text(
+                      '${items.length} items · '
+                      '${totalUnits.toStringAsFixed(0)} units',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                ],
+              ),
         actions: [
           if (_searching)
             IconButton(icon: const Icon(Icons.close), onPressed: _closeSearch)
@@ -128,25 +147,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
       body: Column(
         children: [
           if (store.lowStockCount > 0)
-            Container(
-              width: double.infinity,
-              color: theme.colorScheme.errorContainer,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.warning_amber_rounded,
-                    size: 20,
-                    color: theme.colorScheme.onErrorContainer,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${store.lowStockCount} item(s) at or below reorder level',
-                    style: TextStyle(color: theme.colorScheme.onErrorContainer),
-                  ),
-                ],
-              ),
-            ),
+            _LowStockBanner(count: store.lowStockCount),
           Expanded(
             child: switch ((store.loading, items.isEmpty)) {
               (true, _) => const Center(child: CircularProgressIndicator()),
@@ -156,13 +157,15 @@ class _ItemListScreenState extends State<ItemListScreen> {
               ),
               _ => RefreshIndicator(
                 onRefresh: () => store.refresh(),
-                child: ListView.separated(
-                  padding: const EdgeInsets.only(bottom: 88),
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
                   itemCount: items.length,
-                  separatorBuilder: (_, _) => const Divider(height: 1),
-                  itemBuilder: (context, i) => _ItemRow(
-                    item: items[i],
-                    onTap: () => _openDetail(items[i]),
+                  itemBuilder: (context, i) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _ItemCard(
+                      item: items[i],
+                      onTap: () => _openDetail(items[i]),
+                    ),
                   ),
                 ),
               ),
@@ -179,8 +182,10 @@ class _ItemListScreenState extends State<ItemListScreen> {
   }
 }
 
-class _ItemRow extends StatelessWidget {
-  const _ItemRow({required this.item, required this.onTap});
+/// A card row. The quantity is the loudest thing on it, because that's
+/// what you're actually looking for when you open this screen.
+class _ItemCard extends StatelessWidget {
+  const _ItemCard({required this.item, required this.onTap});
 
   final Item item;
   final VoidCallback onTap;
@@ -188,30 +193,181 @@ class _ItemRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final low = item.isLowStock;
 
-    return ListTile(
-      onTap: onTap,
-      title: Text(item.name),
-      subtitle: Text(
-        [
-          item.sku.isEmpty ? item.barcode : item.sku,
-          if (item.location.isNotEmpty) item.location,
-        ].join('  •  '),
-        style: theme.textTheme.bodySmall,
+    // Location is what you care about; SKU is the fallback.
+    // The barcode is deliberately not shown — 13 digits of noise.
+    final subtitle = item.location.isNotEmpty
+        ? item.location
+        : (item.sku.isNotEmpty ? item.sku : null);
+
+    return Material(
+      color: scheme.surfaceContainer,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              // Status edge. Reads at a glance without shouting.
+              Container(
+                width: 4,
+                color: low
+                    ? scheme.error
+                    : scheme.primary.withValues(alpha: 0.35),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              item.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (subtitle != null) ...[
+                              const SizedBox(height: 3),
+                              Row(
+                                children: [
+                                  Icon(
+                                    item.location.isNotEmpty
+                                        ? Icons.place_outlined
+                                        : Icons.tag_outlined,
+                                    size: 13,
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      subtitle,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: scheme.onSurfaceVariant,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                            if (low) ...[
+                              const SizedBox(height: 5),
+                              Text(
+                                'Low stock',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: scheme.error,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      _QuantityPill(item: item, low: low),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
+    );
+  }
+}
+
+class _QuantityPill extends StatelessWidget {
+  const _QuantityPill({required this.item, required this.low});
+
+  final Item item;
+  final bool low;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+      decoration: BoxDecoration(
+        color: low ? scheme.errorContainer : scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
         children: [
           Text(
             item.quantity.toStringAsFixed(0),
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: low ? theme.colorScheme.error : null,
-              fontWeight: FontWeight.w600,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              height: 1,
+              color: low ? scheme.onErrorContainer : scheme.onSurface,
             ),
           ),
-          Text(item.unit, style: theme.textTheme.labelSmall),
+          const SizedBox(width: 4),
+          Text(
+            item.unit,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: low
+                  ? scheme.onErrorContainer.withValues(alpha: 0.8)
+                  : scheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LowStockBanner extends StatelessWidget {
+  const _LowStockBanner({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      decoration: BoxDecoration(
+        color: scheme.errorContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            size: 18,
+            color: scheme.onErrorContainer,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              '$count ${count == 1 ? 'item' : 'items'} at or below reorder level',
+              style: TextStyle(
+                color: scheme.onErrorContainer,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -227,43 +383,65 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     if (searching) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.search_off, size: 56, color: theme.colorScheme.outline),
-            const SizedBox(height: 12),
+            Icon(Icons.search_off, size: 48, color: scheme.outline),
+            const SizedBox(height: 14),
             Text('No matches', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+              'Try a different term',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       );
     }
 
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.inventory_2_outlined,
-            size: 64,
-            color: theme.colorScheme.outline,
-          ),
-          const SizedBox(height: 12),
-          Text('No items yet', style: theme.textTheme.titleMedium),
-          const SizedBox(height: 4),
-          Text(
-            'Scan a barcode or add one manually',
-            style: theme.textTheme.bodySmall,
-          ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: onAdd,
-            icon: const Icon(Icons.add),
-            label: const Text('Add item'),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHighest,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.inventory_2_outlined,
+                size: 40,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text('No items yet', style: theme.textTheme.titleLarge),
+            const SizedBox(height: 6),
+            Text(
+              'Scan a barcode to get started, or add\nan item manually.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 24),
+            OutlinedButton.icon(
+              onPressed: onAdd,
+              icon: const Icon(Icons.add),
+              label: const Text('Add manually'),
+            ),
+          ],
+        ),
       ),
     );
   }
