@@ -73,6 +73,14 @@ abstract final class CDeviceUtils {
     List<DeviceOrientation> orientations,
   ) => SystemChrome.setPreferredOrientations(orientations);
 
+  static double getAppBarHeight() {
+    return kToolbarHeight;
+  }
+
+  static double getBottomNavigationBarHeight() {
+    return kBottomNavigationBarHeight;
+  }
+
   // --- Platform ---
   static bool get isIOS => defaultTargetPlatform == TargetPlatform.iOS;
   static bool get isAndroid => defaultTargetPlatform == TargetPlatform.android;
