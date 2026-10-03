@@ -1,3 +1,4 @@
+import 'package:ecommerce_app/utils/theme/custom_themes/appbar_theme.dart';
 import 'package:ecommerce_app/utils/theme/custom_themes/elevated_button_theme.dart';
 import 'package:ecommerce_app/utils/theme/custom_themes/text_theme.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ class CAppTheme {
     scaffoldBackgroundColor: Colors.white,
     textTheme: CTextTheme.lightTextTheme,
     elevatedButtonTheme: CElevatedButtonTheme.lightElevatedButton,
+    appBarTheme: CAppBarTheme.lightAppBarTheme,
   );
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
@@ -23,5 +25,6 @@ class CAppTheme {
     scaffoldBackgroundColor: Colors.black,
     textTheme: CTextTheme.darkTextTheme,
     elevatedButtonTheme: CElevatedButtonTheme.darkElevatedButton,
+    appBarTheme: CAppBarTheme.darkAppBarTheme,
   );
 }
