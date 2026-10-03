@@ -22,6 +22,7 @@ class CAppTheme {
     bottomSheetTheme: CBottomSheetTheme.lightBottomSheetTheme,
     checkboxTheme: CCheckBoxTheme.lightCheckBoxThemeData,
     chipTheme: CChipTheme.lightChipTheme,
+    inputDecorationTheme: CTextTheme.lightTextTheme,
   );
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
@@ -35,5 +36,6 @@ class CAppTheme {
     bottomSheetTheme: CBottomSheetTheme.darkBottomSheetTheme,
     checkboxTheme: CCheckBoxTheme.darkCheckBoxThemeData,
     chipTheme: CChipTheme.darkChipTheme,
+    inputDecorationTheme: CTextTheme.darkTextTheme,
   );
 }
