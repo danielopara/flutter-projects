@@ -16,6 +16,11 @@ dependencies:
   get: ^4.7.3
   iconsax: ^0.0.8
   google_fonts: ^9.0.0
+  http: ^1.6.0
+  url_launcher: ^6.3.3
+  intl: ^0.20.3
+  logger: ^2.8.0
+  get_storage: ^2.1.1
 
 dev_dependencies:
   flutter_test:
