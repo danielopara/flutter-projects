@@ -21,6 +21,8 @@ dependencies:
   intl: ^0.20.3
   logger: ^2.8.0
   get_storage: ^2.1.1
+  connectivity_plus: ^7.3.2
+  device_info_plus: ^13.3.0
 
 dev_dependencies:
   flutter_test:
