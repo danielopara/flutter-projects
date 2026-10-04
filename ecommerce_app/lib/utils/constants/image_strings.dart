@@ -1,9 +1,11 @@
 class CImages {
-  static const String darkAppLogo = "assets/images/dark_app_logo.png";
-  static const String lightAppLogo = "assets/images/light_app_logo.png";
+  static const String darkAppLogo =
+      "assets/logos/t-store-splash-logo-black.png";
+  static const String lightAppLogo =
+      "assets/logos/t-store-splash-logo-white.png";
 
-  static const String facebook = "assets/images/facebook.png";
-  static const String google = "assets/images/google.png";
+  static const String facebook = "assets/logos/facebook-icon.png";
+  static const String google = "assets/logos/google-icon.png";
 
   static const String onBoardingImage1 =
       "assets/images/animations/sammy-line-sale.png";
