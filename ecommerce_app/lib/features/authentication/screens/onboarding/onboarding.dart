@@ -1,15 +1,11 @@
 import 'package:ecommerce_app/features/authentication/controllers/onboarding_controller.dart';
-import 'package:ecommerce_app/features/authentication/screens/onboarding/onboarding_navigation.dart';
-import 'package:ecommerce_app/features/authentication/screens/onboarding/onboarding_page.dart';
-import 'package:ecommerce_app/features/authentication/screens/onboarding/onboarding_skip.dart';
-import 'package:ecommerce_app/utils/constants/colors.dart';
+import 'package:ecommerce_app/features/authentication/screens/onboarding/widgets/onboarding_navigation.dart';
+import 'package:ecommerce_app/features/authentication/screens/onboarding/widgets/onboarding_next_button.dart';
+import 'package:ecommerce_app/features/authentication/screens/onboarding/widgets/onboarding_page.dart';
+import 'package:ecommerce_app/features/authentication/screens/onboarding/widgets/onboarding_skip.dart';
 import 'package:ecommerce_app/utils/constants/image_strings.dart';
-import 'package:ecommerce_app/utils/constants/sizes.dart';
 import 'package:ecommerce_app/utils/constants/text_strings.dart';
-import 'package:ecommerce_app/utils/device/device_utility.dart';
-import 'package:ecommerce_app/utils/helpers/helpers.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:flutter/material.dart';
 
 class OnboardingScreen extends StatelessWidget {
@@ -49,27 +45,6 @@ class OnboardingScreen extends StatelessWidget {
 
           const OnboardingNextButton(),
         ],
-      ),
-    );
-  }
-}
-
-class OnboardingNextButton extends StatelessWidget {
-  const OnboardingNextButton({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final dark = CHelperFunctions.isDarkMode(context);
-    return Positioned(
-      right: CSizes.defaultSpace,
-      bottom: CDeviceUtils.getBottomNavigationBarHeight(),
-      child: ElevatedButton(
-        onPressed: () => OnboardingController.instance.nextPage(),
-        style: ElevatedButton.styleFrom(
-          shape: const CircleBorder(),
-          backgroundColor: dark ? CColors.primaryBackground : Colors.black,
-        ),
-        child: const Icon(Iconsax.arrow_right_3),
       ),
     );
   }

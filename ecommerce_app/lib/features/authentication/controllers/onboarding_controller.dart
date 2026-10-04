@@ -1,3 +1,4 @@
+import 'package:ecommerce_app/features/authentication/screens/login/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,7 +18,7 @@ class OnboardingController extends GetxController {
 
   void nextPage() {
     if (currentPageIndex.value == 2) {
-      // Get.to(1);
+      Get.offAll(const LoginScreen());
       currentPageIndex.value = 0;
       pageController.jumpToPage(currentPageIndex.value);
     } else {
@@ -27,7 +28,8 @@ class OnboardingController extends GetxController {
   }
 
   void skipPage() {
-    currentPageIndex.value = 2;
-    pageController.jumpToPage(2);
+    // currentPageIndex.value = 2;
+    // pageController.jumpTo(const LoginScreen());
+    Get.to(const LoginScreen());
   }
 }
