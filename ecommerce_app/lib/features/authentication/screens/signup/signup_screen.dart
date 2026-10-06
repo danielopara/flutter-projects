@@ -1,8 +1,11 @@
+import 'package:ecommerce_app/common/widgets/login_signup/form_divider.dart';
+import 'package:ecommerce_app/common/widgets/login_signup/social_buttons.dart';
 import 'package:ecommerce_app/utils/constants/colors.dart';
 import 'package:ecommerce_app/utils/constants/sizes.dart';
 import 'package:ecommerce_app/utils/constants/text_strings.dart';
 import 'package:ecommerce_app/utils/helpers/helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_utils/src/extensions/export.dart';
 import 'package:iconsax/iconsax.dart';
 
 class SignupScreen extends StatelessWidget {
@@ -173,6 +176,11 @@ class SignupScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: CSizes.spaceBetweenItems),
+              FormDivider(dividerText: CTexts.orSignInWith.capitalize!),
+              const SizedBox(height: CSizes.spaceBetweenItems),
+
+              const SocialButtons(),
             ],
           ),
         ),
