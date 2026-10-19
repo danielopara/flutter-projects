@@ -50,7 +50,8 @@ class _GroceryListState extends State<GroceryList> {
     final messenger = ScaffoldMessenger.of(context);
 
     final url = Uri.https(
-      'fluttter-prep-a2292-default-rtdb.firebaseio.com',
+      // 'fluttter-prep-a2292-default-rtdb.firebaseio.com',
+      'meals-app-a77e6-default-rtdb.firebaseio.com',
       'shopping-list/${item.id}.json',
     );
 
@@ -68,7 +69,7 @@ class _GroceryListState extends State<GroceryList> {
           label: 'Undo',
           onPressed: () async {
             final undoUrl = Uri.https(
-              'fluttter-prep-a2292-default-rtdb.firebaseio.com',
+              'meals-app-a77e6-default-rtdb.firebaseio.com',
               'shopping-list/${item.id}.json',
             );
 
@@ -115,7 +116,8 @@ class _GroceryListState extends State<GroceryList> {
 
   void _loadItems() async {
     final url = Uri.https(
-      'fluttter-prep-a2292-default-rtdb.firebaseio.com',
+      // 'fluttter-prep-a2292-default-rtdb.firebaseio.com',
+      'meals-app-a77e6-default-rtdb.firebaseio.com',
       'shopping-list.json',
     );
 

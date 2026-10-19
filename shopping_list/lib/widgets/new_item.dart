@@ -29,7 +29,8 @@ class _NewItemState extends State<NewItem> {
         _isSending = true;
       });
       final url = Uri.https(
-        'fluttter-prep-a2292-default-rtdb.firebaseio.com',
+        // 'fluttter-prep-a2292-default-rtdb.firebaseio.com',
+        'meals-app-a77e6-default-rtdb.firebaseio.com',
         'shopping-list.json',
       );
       final response = await http.post(
