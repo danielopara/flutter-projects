@@ -35,17 +35,23 @@ class GarmentPhoto extends ConsumerWidget {
     );
 
     final path = imagePath;
+    final image = path == null
+        ? null
+        : ref.watch(garmentStoreProvider).imageProvider(path);
     final dpr = MediaQuery.devicePixelRatioOf(context);
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
-      child: path == null
+      child: image == null
           ? placeholder
-          : Image.file(
-              ref.watch(garmentStoreProvider).imageFile(path),
+          : Image(
+              image: ResizeImage.resizeIfNeeded(
+                (size * dpr).round(),
+                null,
+                image,
+              ),
               width: size,
               height: size,
               fit: BoxFit.cover,
-              cacheWidth: (size * dpr).round(),
               excludeFromSemantics: true,
               errorBuilder: (_, _, _) => placeholder,
             ),

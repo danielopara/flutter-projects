@@ -1,10 +1,15 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wardrobe/app.dart';
 import 'package:wardrobe/data/garment_store.dart';
+import 'package:wardrobe/data/legacy_wardrobe_io.dart';
+import 'package:wardrobe/data/wardrobe_database.dart';
 import 'package:wardrobe/models/garment.dart';
 import 'package:wardrobe/screens/garment_form_screen.dart';
 import 'package:wardrobe/state/wardrobe_providers.dart';
@@ -25,14 +30,14 @@ class FakeAuthenticator extends Authenticator {
 }
 
 void main() {
-  late Directory dir;
+  late WardrobeDatabase db;
   late GarmentStore store;
 
   setUp(() {
-    dir = Directory.systemTemp.createTempSync('wardrobe_test');
-    store = GarmentStore(dir);
+    db = WardrobeDatabase(NativeDatabase.memory());
+    store = GarmentStore(db);
   });
-  tearDown(() => dir.deleteSync(recursive: true));
+  tearDown(() => db.close());
 
   const shirt = Garment(
     id: '1',
@@ -64,21 +69,62 @@ void main() {
 
     test('saves and loads', () async {
       await store.save(const WardrobeData(garments: [shirt], appLock: true));
-      final data = await GarmentStore(dir).load();
+      final data = await store.load();
       expect(data.garments.single.name, 'Linen shirt');
+      expect(data.garments.single.colors, ['White', 'Blue']);
+      expect(data.garments.single.imagePath, 'a.jpg');
       expect(data.appLock, isTrue);
     });
 
+    test('keeps garments in the order saved', () async {
+      final shoes = shirt.copyWith(name: 'Shoes');
+      await store.save(
+        WardrobeData(
+          garments: [
+            Garment.fromJson({...shoes.toJson(), 'id': '2'}),
+            shirt,
+          ],
+        ),
+      );
+      final names = [for (final g in (await store.load()).garments) g.name];
+      expect(names, ['Shoes', 'Linen shirt']);
+    });
+
     test('imports and prunes images', () async {
-      final src = File('${dir.path}/src.JPG')..writeAsStringSync('img');
-      final name = await store.importImage(src.path);
+      final name = await store.importImage(
+        Uint8List.fromList('img'.codeUnits),
+        fileName: 'src.JPG',
+      );
       expect(name, endsWith('.jpg'));
-      expect(store.imageFile(name).existsSync(), isTrue);
+      expect(await store.photoBytes(name), 'img'.codeUnits);
 
       await store.pruneImages(keep: {name});
-      expect(store.imageFile(name).existsSync(), isTrue);
+      expect(await store.photoBytes(name), isNotNull);
       await store.pruneImages(keep: {});
-      expect(store.imageFile(name).existsSync(), isFalse);
+      expect(await store.photoBytes(name), isNull);
+    });
+
+    test('imports a pre-SQLite wardrobe once, with its photos', () async {
+      final dir = Directory.systemTemp.createTempSync('wardrobe_legacy');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final legacy = FileGarmentStoreFixture(dir)
+        ..write(const WardrobeData(garments: [shirt], appLock: true))
+        ..writePhoto('a.jpg', 'old photo');
+
+      final imported = GarmentStore(
+        db,
+        readLegacy: () => readLegacyWardrobeFrom(dir),
+      );
+      final data = await imported.load();
+      expect(data.garments.single.name, 'Linen shirt');
+      expect(data.appLock, isTrue);
+      expect(await imported.photoBytes('a.jpg'), 'old photo'.codeUnits);
+      expect(legacy.json.existsSync(), isFalse);
+      expect(File('${legacy.json.path}.imported').existsSync(), isTrue);
+
+      // Nothing left to import, so a second load reads SQLite only.
+      await imported.save(const WardrobeData());
+      expect((await imported.load()).garments, isEmpty);
     });
   });
 
@@ -126,7 +172,7 @@ void main() {
           child: const WardrobeApp(),
         ),
       );
-      // File IO is real, so let it complete outside the fake clock.
+      // Database IO is real, so let it complete outside the fake clock.
       await tester.runAsync(() => Future<void>.delayed(Duration.zero));
       for (var i = 0; i < 5; i++) {
         await tester.runAsync(
@@ -214,4 +260,20 @@ void main() {
       expect(find.text('Your wardrobe is empty'), findsOneWidget);
     });
   });
+}
+
+/// Writes the JSON-and-files layout used before SQLite.
+class FileGarmentStoreFixture {
+  FileGarmentStoreFixture(this.root);
+
+  final Directory root;
+
+  File get json => File('${root.path}/wardrobe.json');
+
+  void write(WardrobeData data) =>
+      json.writeAsStringSync(jsonEncode(data.toJson()));
+
+  void writePhoto(String name, String contents) => (File(
+    '${root.path}/images/$name',
+  )..createSync(recursive: true)).writeAsStringSync(contents);
 }

@@ -102,7 +102,7 @@ class _GarmentFormScreenState extends ConsumerState<GarmentFormScreen> {
       if (file == null) return;
       final stored = await ref
           .read(garmentStoreProvider)
-          .importImage(file.path);
+          .importImage(await file.readAsBytes(), fileName: file.name);
       if (!mounted) return;
       setState(() => _imagePath = stored);
     } catch (e) {

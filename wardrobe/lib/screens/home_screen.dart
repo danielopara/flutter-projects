@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wardrobe/models/garment.dart';
@@ -117,16 +118,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: const Text('Wardrobe'),
         actions: [
-          PopupMenuButton<void>(
-            tooltip: 'Settings',
-            itemBuilder: (_) => [
-              CheckedPopupMenuItem(
-                checked: data.appLock,
-                onTap: () => _toggleLock(!data.appLock),
-                child: const Text('App lock'),
-              ),
-            ],
-          ),
+          // Browsers have no Face ID or fingerprint unlock, so no app lock.
+          if (!kIsWeb)
+            PopupMenuButton<void>(
+              tooltip: 'Settings',
+              itemBuilder: (_) => [
+                CheckedPopupMenuItem(
+                  checked: data.appLock,
+                  onTap: () => _toggleLock(!data.appLock),
+                  child: const Text('App lock'),
+                ),
+              ],
+            ),
         ],
       ),
       body: garments.isEmpty
