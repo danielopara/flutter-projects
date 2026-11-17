@@ -43,6 +43,7 @@ dependencies:
   share_plus: ^13.3.0
   path_provider: ^2.1.6
   barcode_widget: ^2.0.4
+  sqflite_common_ffi_web: ^1.2.0
 
 dev_dependencies:
   flutter_test:

@@ -1,17 +1,36 @@
-# wardrobe
+# Wardrobe
 
-A new Flutter project.
+A personal wardrobe inventory: keep track of the clothes you own, how many of
+each, their colours and a photo.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- Add, edit and delete garments (name, category, colours, quantity, photo)
+- Photos from the camera or photo library, stored in the app's documents folder
+- Filter by category, search by name, category or colour
+- Quick +/- quantity buttons; swipe left to delete, with undo
+- Optional app lock (Face ID / Touch ID / fingerprint / device passcode)
+- Everything stays on the device in `wardrobe/wardrobe.json`
 
-A few resources to get you started if this is your first Flutter project:
+## Structure
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+```
+lib/
+  main.dart                    bootstraps the store and ProviderScope
+  app.dart                     MaterialApp + AppGate (loading / lock / home)
+  models/garment.dart          Garment, Category, colour palette
+  data/garment_store.dart      JSON file + image persistence
+  state/wardrobe_providers.dart Riverpod notifier and auth seam
+  screens/                     home, add/edit form, lock screen
+  widgets/garment_photo.dart   photo thumbnail and colour dots
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Run
+
+```sh
+flutter pub get
+flutter test
+flutter run
+```
+
+Targets iOS, Android and macOS. Web is not supported because storage uses `dart:io`.
